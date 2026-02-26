@@ -87,10 +87,19 @@ COLOR_MODE = 'spectrum'   # 'spectrum' (full rainbow) or 'g102' (cyan-purple)
 
 The [Logitech G102 LIGHTSYNC](https://www.logitechg.com/en-us/products/gaming-mice/g102-lightsync-rgb-gaming-mouse.html) mouse has a beautiful RGB light ring that continuously cycles through the color spectrum. **Not Enough RGB** brings that same aesthetic to your entire Windows desktop.
 
+## 🗺️ Roadmap
+
+- [ ] **OpenRGB Integration** — Sync window border colors with all your physical RGB hardware (keyboard, mouse, RAM, fans) via [OpenRGB](https://openrgb.org/) SDK
+- [ ] **Logitech GHUB Sync** — Direct integration with Logitech devices (G102, G Pro, etc.)
+- [ ] **Audio Reactive Mode** — Border colors react to music/system audio
+- [ ] **Per-App Color Profiles** — Assign specific gradient themes to specific apps
+- [ ] **Multi-Monitor Awareness** — Independent color zones per monitor
+- [ ] **Wallpaper Engine Integration** — Sync with animated wallpapers
+
 ## 📄 License
 
 MIT License — do whatever you want with it.
 
 ---
 
-_Made with 🌈 and an unhealthy obsession with RGB._
+_Made with an unhealthy obsession with RGB._
