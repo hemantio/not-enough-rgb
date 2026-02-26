@@ -93,4 +93,4 @@ MIT License — do whatever you want with it.
 
 ---
 
-_Made with 🌈 and an unhealthy obsession with RGB._
+_Made with  and an unhealthy obsession with RGB._
