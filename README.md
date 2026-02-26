@@ -1,4 +1,4 @@
-# 🌈 Not Enough RGB
+#  Not Enough RGB
 
 > _Because there's never enough RGB._
 
