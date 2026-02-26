@@ -17,6 +17,7 @@ import threading
 import sys
 import signal
 import time
+import os
 from PIL import Image, ImageDraw
 import pystray
 
@@ -180,7 +181,6 @@ class ChromaGlow:
             self.paused = not self.paused
             if self.paused:
                 icon.title = 'Not Enough RGB (PAUSED)'
-                # Hide all borders
                 self.root.after(0, self._hide_all_borders)
             else:
                 icon.title = 'Not Enough RGB'
@@ -188,10 +188,20 @@ class ChromaGlow:
         def get_toggle_text(item):
             return 'Start' if self.paused else 'Stop'
 
+        def toggle_startup(icon, item):
+            if self._is_in_startup():
+                self._remove_from_startup()
+            else:
+                self._add_to_startup()
+
         menu = pystray.Menu(
             pystray.MenuItem('Not Enough RGB', None, enabled=False),
             pystray.Menu.SEPARATOR,
             pystray.MenuItem(get_toggle_text, toggle_pause, default=True),
+            pystray.MenuItem('Start with Windows',
+                             toggle_startup,
+                             checked=lambda item: self._is_in_startup()),
+            pystray.Menu.SEPARATOR,
             pystray.MenuItem('Quit', lambda: self.root.after(0, self._quit)),
         )
 
@@ -204,6 +214,62 @@ class ChromaGlow:
 
         # Run tray icon in background thread
         threading.Thread(target=self.tray_icon.run, daemon=True).start()
+
+    # -- Startup Management --
+
+    def _get_startup_path(self):
+        """Path to the shortcut in Windows Startup folder."""
+        startup = os.path.join(
+            os.environ.get('APPDATA', ''),
+            'Microsoft', 'Windows', 'Start Menu', 'Programs', 'Startup'
+        )
+        return os.path.join(startup, 'Not Enough RGB.lnk')
+
+    def _get_script_path(self):
+        """Get the .pyw script path."""
+        folder = os.path.dirname(os.path.abspath(__file__))
+        pyw = os.path.join(folder, 'not_enough_rgb.pyw')
+        if os.path.exists(pyw):
+            return pyw
+        return os.path.abspath(__file__)
+
+    def _is_in_startup(self):
+        """Check if startup shortcut exists."""
+        return os.path.exists(self._get_startup_path())
+
+    def _add_to_startup(self):
+        """Create a shortcut in Windows Startup folder."""
+        try:
+            import subprocess
+            shortcut_path = self._get_startup_path()
+            script_path = self._get_script_path()
+            pythonw = os.path.join(os.path.dirname(sys.executable), 'pythonw.exe')
+            if not os.path.exists(pythonw):
+                pythonw = sys.executable
+
+            # Use PowerShell to create .lnk shortcut
+            ps_cmd = (
+                f'$ws = New-Object -ComObject WScript.Shell; '
+                f'$sc = $ws.CreateShortcut("{shortcut_path}"); '
+                f'$sc.TargetPath = "{pythonw}"; '
+                f'$sc.Arguments = "\"{script_path}\""; '
+                f'$sc.WorkingDirectory = "{os.path.dirname(script_path)}"; '
+                f'$sc.Description = "Not Enough RGB - RGB Gradient Borders"; '
+                f'$sc.Save()'
+            )
+            subprocess.run(['powershell', '-Command', ps_cmd],
+                           capture_output=True, timeout=10)
+        except Exception:
+            pass
+
+    def _remove_from_startup(self):
+        """Remove the startup shortcut."""
+        try:
+            path = self._get_startup_path()
+            if os.path.exists(path):
+                os.remove(path)
+        except Exception:
+            pass
 
     def _hide_all_borders(self):
         """Hide all border segments when paused."""
